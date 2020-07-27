@@ -1,4 +1,4 @@
-# docker-mongodb-s3-backup
+# mongodb-s3-backup
 
 A Docker Image to run MongoDB backups unattended using mongoexport
 
@@ -25,5 +25,5 @@ Currently, the only supported action name is `backup`.
 ## Test image locally
 
 ```bash
-docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ev-freaks/mongodb-s3-backup backup collection1 collection2
+docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws evfreaks/mongodb-s3-backup backup collection1 collection2
 ```
