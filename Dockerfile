@@ -4,7 +4,7 @@ LABEL maintainer="remus@ev-freaks.com"
 
 # Install the AWS cli incl. python dependencies
 RUN apt-get update \
-  && apt-get install awscli --no-install-recommends -y \
+  && apt-get install awscli jq --no-install-recommends -y \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

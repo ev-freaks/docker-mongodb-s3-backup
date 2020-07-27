@@ -14,9 +14,19 @@ function sanity_checks() {
   fi
 }
 
+function get_all_collections() {
+  mongo "$MONGODB_BACKUP_URI" --quiet --eval "rs.slaveOk();db.getCollectionNames();" \
+    | jq -r '.[]'
+}
+
 function backup() {
   sanity_checks
-  collections=$*
+
+  if [ $# -gt 0 ]; then
+    collections=$*
+  else
+    collections=$(get_all_collections)
+  fi
 
   s3_sse="--sse"
 

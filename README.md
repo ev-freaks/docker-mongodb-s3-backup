@@ -18,7 +18,7 @@ Per invocation, the script will create a folder `YYYYMMDD-HHmmss` to save the ba
 
 ## Usage
 
-Execute this image using an "action" parameter, followed by a list of collections to be processed.
+Execute this image using an "action" parameter, followed by a list of collections to be processed (leave empty to process all available collections in the database).
  
 Currently, the only supported action name is `backup`.
 
