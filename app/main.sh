@@ -36,7 +36,7 @@ function backup() {
     echo "processing collection $collection .. "
     backup_file="${collection}.jsonl.gz"
 
-    mongoexport -c "$collection" --quiet --uri "$MONGODB_BACKUP_URI" \
+    mongoexport -c "$collection" --uri "$MONGODB_BACKUP_URI" \
       | gzip -c \
       | aws s3 cp - "$MONGODB_BACKUP_S3_URL"/"$backup_folder"/"$backup_file" --no-progress $s3_sse
   done
