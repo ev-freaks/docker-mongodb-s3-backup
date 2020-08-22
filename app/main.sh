@@ -30,21 +30,18 @@ function backup() {
 
   s3_sse="--sse"
 
-  tmp_dir=$(mktemp -d /tmp/mongodb-backup.XXXXXXXXXX)
   backup_folder=$(date +%Y%m%d-%H%M%S)
 
   for collection in $collections ; do
     echo -n "processing collection $collection .. "
-    backup_file="${tmp_dir}/${collection}.jsonl.gz"
+    backup_file="${collection}.jsonl.gz"
 
-    mongoexport -c "$collection" --quiet --uri "$MONGODB_BACKUP_URI" | gzip -c > "$backup_file"
-    aws s3 cp "$backup_file" "$MONGODB_BACKUP_S3_URL"/"$backup_folder"/ $s3_sse
+    mongoexport -c "$collection" --quiet --uri "$MONGODB_BACKUP_URI" \
+      | gzip -c \
+      | aws s3 cp - "$MONGODB_BACKUP_S3_URL"/"$backup_folder"/"$backup_file" $s3_sse
 
-    rm -f "$backup_file"
     echo "done."
   done
-
-  rmdir "$tmp_dir"
 }
 
 ##
