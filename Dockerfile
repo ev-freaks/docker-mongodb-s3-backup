@@ -1,4 +1,4 @@
-FROM mongo:4
+FROM mongo:5
 
 LABEL maintainer="remus@ev-freaks.com"
 
