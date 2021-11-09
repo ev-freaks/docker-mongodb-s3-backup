@@ -9,6 +9,11 @@ on:
 jobs:
   buildx:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        mongo: [ 4,5 ]
+
     # see https://github.com/marketplace/actions/docker-buildx
     steps:
       - name: Checkout
@@ -39,8 +44,9 @@ jobs:
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=local,dest=/tmp/.buildx-cache" \
             --platform linux/amd64,linux/arm64 \
+            --build-arg MONGO_MAJOR_VERSION=${{ matrix.mongo }} \
             --output "type=image,push=false" \
-            --tag evfreaks/mongodb-s3-backup:latest \
+            --tag evfreaks/mongodb-s3-backup:${{ matrix.mongo }} \
             --file ./Dockerfile ./
 
       - name: Login to DockerHub
@@ -54,8 +60,9 @@ jobs:
           docker buildx build \
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --platform linux/amd64,linux/arm64 \
+            --build-arg MONGO_MAJOR_VERSION=${{ matrix.mongo }} \
             --output "type=image,push=true" \
-            --tag evfreaks/mongodb-s3-backup:latest \
+            --tag evfreaks/mongodb-s3-backup:${{ matrix.mongo }} \
             --file ./Dockerfile ./
 
       - name: Inspect image

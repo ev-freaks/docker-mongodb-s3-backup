@@ -1,4 +1,6 @@
-FROM mongo:5
+ARG MONGO_MAJOR_VERSION="5"
+
+FROM mongo:${MONGO_MAJOR_VERSION}
 
 LABEL maintainer="remus@ev-freaks.com"
 
