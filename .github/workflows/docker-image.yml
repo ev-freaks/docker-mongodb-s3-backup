@@ -67,4 +67,4 @@ jobs:
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect evfreaks/mongodb-s3-backup:latest
+          docker buildx imagetools inspect evfreaks/mongodb-s3-backup:${{ matrix.mongo }}
