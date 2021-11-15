@@ -26,6 +26,15 @@ Currently, the only supported action name is `backup`.
 
 ## Test image locally
 
+Test official image
+
 ```bash
+docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws evfreaks/mongodb-s3-backup:5 backup collection1 collection2
+```
+
+Build and test -testing image
+
+```shell
+make build
 docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws evfreaks/mongodb-s3-backup:5 backup collection1 collection2
 ```

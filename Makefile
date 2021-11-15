@@ -10,6 +10,9 @@ builder:
 build-and-push:
 	docker buildx build --builder builder --build-arg MONGO_MAJOR_VERSION="${MONGO_MAJOR_VERSION}" --platform linux/amd64,linux/arm64 -t "${DOCKER_REPO}-testing" --push .
 
+build:
+	docker build --build-arg MONGO_MAJOR_VERSION="${MONGO_MAJOR_VERSION}" -t "${DOCKER_REPO}-testing" .
+
 inspect:
 	docker buildx imagetools inspect "${DOCKER_REPO}-testing"
 
