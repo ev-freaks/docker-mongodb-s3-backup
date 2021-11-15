@@ -3,19 +3,19 @@
 set -e
 
 function sanity_checks() {
-  if ! [[ $MONGODB_BACKUP_S3_URL ]]; then
+  if ! [[ "$MONGODB_BACKUP_S3_URL" ]]; then
     echo "MONGODB_BACKUP_S3_URL env var not set"
     exit 20
   fi
 
-  if ! [[ $MONGODB_BACKUP_URI ]]; then
+  if ! [[ "$MONGODB_BACKUP_URI" ]]; then
     echo "MONGODB_BACKUP_URI env var not set"
     exit 20
   fi
 }
 
 function get_all_collections() {
-  mongo "$MONGODB_BACKUP_URI" --quiet --eval "rs.slaveOk();db.getCollectionNames();" \
+  mongo "$MONGODB_BACKUP_URI" --quiet --eval "rs.secondaryOk();db.getCollectionNames();" \
     | jq -r '.[]'
 }
 
