@@ -36,11 +36,17 @@ primary), and when run as an ECS task it also queries the [task metadata endpoin
 replica set member tagged with a matching `az` tag. Outside of ECS, or before the replica set
 members are tagged, it falls back to any secondary.
 
-For same-AZ routing to actually take effect, tag each replica set member with its zone, e.g.:
+For same-AZ routing to actually take effect, tag each replica set member with its own zone
+(each member needs a different value - keyed by `host` here so it's clear which is which):
 
 ```js
 cfg = rs.conf()
-cfg.members.forEach(m => { m.tags = { ...m.tags, az: "eu-central-1a" } }) // set per member
+const az = {
+  'mongodb-node-a.example.com:27017': 'eu-central-1a',
+  'mongodb-node-b.example.com:27017': 'eu-central-1b',
+  'mongodb-node-c.example.com:27017': 'eu-central-1c',
+}
+cfg.members.forEach(m => { m.tags = { ...m.tags, az: az[m.host] } })
 rs.reconfig(cfg)
 ```
 
