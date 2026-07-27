@@ -19,6 +19,33 @@ function get_all_collections() {
     | jq -r '.[]'
 }
 
+##
+# Builds a mongoexport --readPreference value that prefers a replica set member in the same
+# availability zone as this task, falling back to any secondary and then to the primary.
+#
+# Each mongoexport run reads a whole collection (no query/projection), so on a multi-GB
+# collection this is real cross-AZ data transfer cost if it happens to land on a member in a
+# different AZ than the task. The ECS task metadata endpoint (present on both EC2 and Fargate
+# launch types) reports which AZ the task itself is running in; matching that against an `az`
+# tag on the replica set members lets mongoexport route to the local one.
+#
+# Falls back to a plain "secondaryPreferred" (still off the primary, just not AZ-aware) when
+# the metadata endpoint isn't reachable - e.g. when running the image outside of ECS - or when
+# the replica set members aren't tagged with `az` yet, since an unmatched tagSet just falls
+# through to the empty `{}` tagSet (any secondary).
+function read_preference() {
+  local az=""
+  if [[ -n "$ECS_CONTAINER_METADATA_URI_V4" ]]; then
+    az=$(curl -s -m 2 "$ECS_CONTAINER_METADATA_URI_V4/task" | jq -r '.AvailabilityZone // empty' 2>/dev/null || true)
+  fi
+
+  if [[ -n "$az" ]]; then
+    echo "{\"mode\": \"secondaryPreferred\", \"tagSets\": [{\"az\": \"$az\"}, {}]}"
+  else
+    echo "secondaryPreferred"
+  fi
+}
+
 function backup() {
   sanity_checks
 
@@ -29,6 +56,8 @@ function backup() {
   fi
 
   s3_sse="--sse"
+  read_pref=$(read_preference)
+  echo "using read preference: $read_pref"
 
   backup_folder=$(date +%Y%m%d-%H%M%S)
 
@@ -36,7 +65,7 @@ function backup() {
     echo "processing collection $collection .. "
     backup_file="${collection}.jsonl.gz"
 
-    mongoexport -c "$collection" --uri "$MONGODB_BACKUP_URI" \
+    mongoexport -c "$collection" --uri "$MONGODB_BACKUP_URI" --readPreference="$read_pref" \
       | gzip -c \
       | aws s3 cp - "$MONGODB_BACKUP_S3_URL"/"$backup_folder"/"$backup_file" --no-progress $s3_sse
   done

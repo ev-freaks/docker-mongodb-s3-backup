@@ -24,6 +24,28 @@ Execute this image using an "action" parameter, followed by a list of collection
  
 Currently, the only supported action name is `backup`.
 
+### Read preference / availability zone
+
+Each `mongoexport` reads a full collection with no query or projection, so on a large
+collection this is a meaningful amount of cross-AZ data transfer if it happens to land on a
+replica set member in a different AZ than the task.
+
+The image now always exports with `readPreference=secondaryPreferred` (never reads from the
+primary), and when run as an ECS task it also queries the [task metadata endpoint]
+(`$ECS_CONTAINER_METADATA_URI_V4/task`) for the task's own availability zone and prefers a
+replica set member tagged with a matching `az` tag. Outside of ECS, or before the replica set
+members are tagged, it falls back to any secondary.
+
+For same-AZ routing to actually take effect, tag each replica set member with its zone, e.g.:
+
+```js
+cfg = rs.conf()
+cfg.members.forEach(m => { m.tags = { ...m.tags, az: "eu-central-1a" } }) // set per member
+rs.reconfig(cfg)
+```
+
+[task metadata endpoint]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v4-fargate.html
+
 ## Test image locally
 
 Test official image
