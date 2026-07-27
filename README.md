@@ -1,8 +1,8 @@
 # mongodb-s3-backup
 
-A Docker Image to run MongoDB backups unattended using mongoexport. Available for both arm64 and x86 (amd64) architectures.
+A Docker Image to run MongoDB backups unattended using mongoexport. Available for both arm64 and x86 (amd64) architectures, built on MongoDB 7.
 
-There are also two versions of the docker image for MogoDB versions 4 and 5.
+Published to `ghcr.io/ev-freaks/mongodb-s3-backup:7`.
 
 ## In a nutshell
 
@@ -57,12 +57,12 @@ rs.reconfig(cfg)
 Test official image
 
 ```bash
-docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws evfreaks/mongodb-s3-backup:5 backup collection1 collection2
+docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ghcr.io/ev-freaks/mongodb-s3-backup:7 backup collection1 collection2
 ```
 
 Build and test -testing image
 
 ```shell
 make build
-docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws evfreaks/mongodb-s3-backup:5 backup collection1 collection2
+docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ghcr.io/ev-freaks/mongodb-s3-backup:7 backup collection1 collection2
 ```

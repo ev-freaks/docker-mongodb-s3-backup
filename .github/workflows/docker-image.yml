@@ -6,13 +6,17 @@ on:
   push:
     branches: master
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   buildx:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        mongo: [ 4,5 ]
+        mongo: [ 7 ]
 
     # see https://github.com/marketplace/actions/docker-buildx
     steps:
@@ -46,25 +50,33 @@ jobs:
             --platform linux/amd64,linux/arm64 \
             --build-arg MONGO_MAJOR_VERSION=${{ matrix.mongo }} \
             --output "type=image,push=false" \
-            --tag evfreaks/mongodb-s3-backup:${{ matrix.mongo }} \
+            --tag ghcr.io/ev-freaks/mongodb-s3-backup:${{ matrix.mongo }} \
             --file ./Dockerfile ./
 
-      - name: Login to DockerHub
+      # only needed to push, so it's skipped entirely on PR runs - no reason to authenticate
+      # against the registry until we're actually about to publish
+      - name: Login to GHCR
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
+      # gated to the push event: PR runs only build the image; merging to master is what
+      # actually publishes it, so unreviewed PR code can't overwrite the shared :7 tag
       - name: Docker Buildx (push)
+        if: github.event_name == 'push'
         run: |
           docker buildx build \
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --platform linux/amd64,linux/arm64 \
             --build-arg MONGO_MAJOR_VERSION=${{ matrix.mongo }} \
             --output "type=image,push=true" \
-            --tag evfreaks/mongodb-s3-backup:${{ matrix.mongo }} \
+            --tag ghcr.io/ev-freaks/mongodb-s3-backup:${{ matrix.mongo }} \
             --file ./Dockerfile ./
 
       - name: Inspect image
+        if: github.event_name == 'push'
         run: |
-          docker buildx imagetools inspect evfreaks/mongodb-s3-backup:${{ matrix.mongo }}
+          docker buildx imagetools inspect ghcr.io/ev-freaks/mongodb-s3-backup:${{ matrix.mongo }}

@@ -15,7 +15,10 @@ function sanity_checks() {
 }
 
 function get_all_collections() {
-  mongo "$MONGODB_BACKUP_URI" --quiet --eval "rs.secondaryOk();db.getCollectionNames();" \
+  # MongoDB 6+ images no longer ship the legacy `mongo` shell, only `mongosh` - which prints a
+  # deprecation warning for rs.secondaryOk() and pretty-prints arrays with single quotes (not
+  # valid JSON), so this uses the non-deprecated read-pref call and forces real JSON output.
+  mongosh "$MONGODB_BACKUP_URI" --quiet --eval "db.getMongo().setReadPref('secondaryPreferred'); JSON.stringify(db.getCollectionNames())" \
     | jq -r '.[]'
 }
 
