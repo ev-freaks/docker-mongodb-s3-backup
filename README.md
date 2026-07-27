@@ -1,5 +1,7 @@
 # mongodb-s3-backup
 
+[![Build and Push Docker Image](https://github.com/ev-freaks/docker-mongodb-s3-backup/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ev-freaks/docker-mongodb-s3-backup/actions/workflows/docker-image.yml)
+
 A Docker Image to run MongoDB backups unattended using mongoexport. Available for both arm64 and x86 (amd64) architectures, built on MongoDB 7.
 
 Published to `ghcr.io/ev-freaks/mongodb-s3-backup:7`.
@@ -12,10 +14,10 @@ The backup script stores all the backup artifacts in S3, the S3 bucket name and 
 
 Per invocation, the script will create a folder `YYYYMMDD-HHmmss` to save the backup artifacts.
 
-| EVN var name | Description | Example |
+| Env var name | Description | Example |
 | --- | --- | --- |
-| MONGODB_BACKUP_URI|MongoDB URI|`mongodb://my-mongo-server.intern/my-database`
-| MONGODB_BACKUP_S3_URL|S3 URL where the backup generations should be stored|`s3://my-bucket-name/my/path`
+| `MONGODB_BACKUP_URI` | MongoDB URI | `mongodb://my-mongo-server.intern/my-database` |
+| `MONGODB_BACKUP_S3_URL` | S3 URL where the backup generations should be stored | `s3://my-bucket-name/my/path` |
 
 
 ## Usage
@@ -54,15 +56,15 @@ rs.reconfig(cfg)
 
 ## Test image locally
 
-Test official image
+Test the published image
 
 ```bash
 docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ghcr.io/ev-freaks/mongodb-s3-backup:7 backup collection1 collection2
 ```
 
-Build and test -testing image
+Build and test a local image
 
 ```shell
 make build
-docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ghcr.io/ev-freaks/mongodb-s3-backup:7 backup collection1 collection2
+docker run --rm --env-file .env -e AWS_PROFILE=$AWS_PROFILE -v ~/.aws:/root/.aws ghcr.io/ev-freaks/mongodb-s3-backup:7-testing backup collection1 collection2
 ```
