@@ -1,6 +1,6 @@
-MONGO_MAJOR_VERSION := 5
+MONGO_MAJOR_VERSION := 7
 
-DOCKER_REPO := evfreaks/mongodb-s3-backup:${MONGO_MAJOR_VERSION}
+DOCKER_REPO := ghcr.io/ev-freaks/mongodb-s3-backup:${MONGO_MAJOR_VERSION}
 
 all: build-and-push
 
